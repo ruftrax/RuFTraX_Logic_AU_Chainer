@@ -1,9 +1,21 @@
+# Build folders
 build/
+Builds/
+cmake-build-*/
+
+# macOS
 .DS_Store
-*.app
-*.component
-*.vst3
+
+# CMake
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 Makefile
+
+# Generated plug-ins
+*.app
+*.component
+*.vst3
+
+# Logs
+*.log
