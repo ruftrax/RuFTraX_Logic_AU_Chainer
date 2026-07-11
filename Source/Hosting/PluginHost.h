@@ -1,11 +1,16 @@
 #pragma once
+
 #include <array>
+
+#include "AUHost.h"
 #include "PluginInstance.h"
 
 class PluginHost
 {
 public:
     static constexpr int numSlots = 8;
+
+    PluginHost();
 
     PluginInstance& getSlot(int index);
     const PluginInstance& getSlot(int index) const;
@@ -14,9 +19,23 @@ public:
     void clearSlot(int index);
 
     void prepare(double sampleRate, int blockSize);
-    void processSlot(int index, juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi);
+    void processSlot(int index,
+                     juce::AudioBuffer<float>& buffer,
+                     juce::MidiBuffer& midi);
+
     bool slotHasHostedPlugin(int index) const;
 
+    bool loadAudioUnit(int index,
+                       const AUPluginInfo& info,
+                       double sampleRate,
+                       int blockSize,
+                       juce::String& errorMessage);
+
+    bool openEditor(int index, juce::String& errorMessage);
+
 private:
+    bool isValidSlot(int index) const;
+
     std::array<PluginInstance, numSlots> slots;
+    juce::AudioPluginFormatManager formatManager;
 };
