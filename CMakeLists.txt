@@ -1,51 +1,52 @@
 cmake_minimum_required(VERSION 3.22)
-project(RuFTraX_Logic_AU_Chainer VERSION 0.1.0)
+project(RuFTraX_PlugIn_Chainer VERSION 0.6.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Put JUCE in a sibling folder or set JUCE_DIR before configuring:
-# cmake -B build -S . -DJUCE_DIR=/path/to/JUCE
 if(NOT DEFINED JUCE_DIR)
     message(FATAL_ERROR "Set JUCE_DIR to your JUCE folder, e.g. -DJUCE_DIR=/Users/mike/JUCE")
 endif()
+
 add_subdirectory(${JUCE_DIR} JUCE)
 
+if(APPLE)
+    find_library(AUDIOTOOLBOX_FRAMEWORK AudioToolbox REQUIRED)
+    find_library(COREFOUNDATION_FRAMEWORK CoreFoundation REQUIRED)
+endif()
+
 juce_add_plugin(RuFTraXLogicChainer
+    BUNDLE_ID "com.ruftrax.pluginchainer"
     COMPANY_NAME "RuFTraX"
     PLUGIN_MANUFACTURER_CODE RfTx
     PLUGIN_CODE RfLC
-    FORMATS AU Standalone
-    PRODUCT_NAME "RuFTraX Logic Chainer"
+    FORMATS AU VST3 Standalone
+    PRODUCT_NAME "RuFTraX Plug-In Chainer"
+    PLUGIN_NAME "RuFTraX Plug-In Chainer"
+    ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/Assets/AppIcon.png"
+    ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/Assets/AppIcon.png"
+    DESCRIPTION "Eight-slot plug-in chainer for Logic Pro and compatible macOS DAWs"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
     IS_MIDI_EFFECT FALSE
     EDITOR_WANTS_KEYBOARD_FOCUS TRUE
-    COPY_PLUGIN_AFTER_BUILD TRUE
+    VST3_CATEGORIES Fx
+    COPY_PLUGIN_AFTER_BUILD FALSE
+    PLUGINHOST_AU TRUE
+    PLUGINHOST_VST3 TRUE
 )
 
 target_sources(RuFTraXLogicChainer PRIVATE
     Source/PluginProcessor.cpp
     Source/PluginEditor.cpp
-    Source/DSP/GainStage.cpp
-    Source/Host/HostEngine.cpp
-    Source/UI/SlotComponent.cpp
-    Source/Hosting/AUHost.cpp
-    Source/Hosting/PluginInstance.cpp
-    Source/Hosting/PluginHost.cpp
-    Source/UI/SlotComponent.cpp
-    Source/Hosting/AUHost.cpp
-    Source/Hosting/PluginInstance.cpp
-    Source/Hosting/PluginHost.cpp
 )
 
 target_compile_definitions(RuFTraXLogicChainer PUBLIC
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
     JUCE_MODAL_LOOPS_PERMITTED=1
-    JUCE_PLUGINHOST_AU=1
-    JUCE_PLUGINHOST_VST3=1
+    JUCE_VST3_CAN_REPLACE_VST2=0
 )
 
 target_link_libraries(RuFTraXLogicChainer PRIVATE
@@ -53,6 +54,8 @@ target_link_libraries(RuFTraXLogicChainer PRIVATE
     juce::juce_audio_processors
     juce::juce_gui_extra
     juce::juce_dsp
+    ${AUDIOTOOLBOX_FRAMEWORK}
+    ${COREFOUNDATION_FRAMEWORK}
     PUBLIC
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
