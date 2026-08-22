@@ -34,7 +34,6 @@ juce_add_plugin(RuFTraXLogicChainer
     VST3_CATEGORIES Fx
     COPY_PLUGIN_AFTER_BUILD FALSE
     PLUGINHOST_AU TRUE
-    PLUGINHOST_VST3 TRUE
 )
 
 target_sources(RuFTraXLogicChainer PRIVATE
@@ -42,7 +41,13 @@ target_sources(RuFTraXLogicChainer PRIVATE
     Source/PluginEditor.cpp
 )
 
+# PLUGINHOST_AU above is a real juce_add_plugin() argument (it also links the
+# CoreAudioKit/AudioUnit frameworks on Apple platforms), but there is no
+# equivalent PLUGINHOST_VST3 argument - VST3 hosting is just a plain compile
+# definition, since JUCE bundles the VST3 SDK itself and hosting a VST3
+# needs no extra framework linking on any platform.
 target_compile_definitions(RuFTraXLogicChainer PUBLIC
+    JUCE_PLUGINHOST_VST3=1
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
     JUCE_MODAL_LOOPS_PERMITTED=1
