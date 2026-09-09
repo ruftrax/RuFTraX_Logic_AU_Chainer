@@ -1,0 +1,59 @@
+name: Windows build - Plug-In Chainer
+
+on:
+  push:
+    branches: [windows-ci-pilot]
+    paths:
+      - 'Source/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/windows-build.yml'
+  workflow_dispatch: {}
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Enable git long-path support
+        run: git config --global core.longpaths true
+        shell: pwsh
+
+      - name: Enable NTFS long-path support
+        run: |
+          New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
+            -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+        shell: pwsh
+
+      - name: Check out RuFTraX_Logic_AU_Chainer
+        uses: actions/checkout@v4
+
+      - name: Check out JUCE 8.0.14
+        uses: actions/checkout@v4
+        with:
+          repository: juce-framework/JUCE
+          ref: 8.0.14
+          path: JUCE
+
+      - name: Configure (CMake, default VS generator, x64)
+        run: |
+          cmake -B build -A x64 `
+            -DJUCE_DIR="${{ github.workspace }}\JUCE" `
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build (Release, all targets)
+        run: cmake --build build --config Release --parallel 4
+
+      - name: List build outputs
+        shell: bash
+        run: |
+          echo "--- Searching for produced plugin/app binaries ---"
+          find build -iname "*.vst3" -o -iname "*.exe" -o -iname "*RuFTraX*" 2>/dev/null | grep -v "\.obj$\|\.pdb$\|CMakeFiles" || true
+
+      - name: Upload build artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chainer-windows-build
+          path: |
+            build/**/Release/**
+          if-no-files-found: warn
+          retention-days: 14
