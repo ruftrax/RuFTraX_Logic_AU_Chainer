@@ -17,6 +17,9 @@ juce_add_plugin(RuFTraXLogicChainer
     PLUGIN_CODE RfLC
     FORMATS AU Standalone
     PRODUCT_NAME "RuFTraX Logic Chainer"
+    # the app icon - the RuFTraX icon standard (see CLAUDE.md); AppIconSmall.png stays 32 px
+    ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/Assets/AppIcon.png"
+    ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/Assets/AppIconSmall.png"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
